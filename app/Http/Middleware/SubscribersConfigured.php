@@ -12,8 +12,8 @@
 namespace CachetHQ\Cachet\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
 
 /**
  * This is the subscribers configured middleware class.
@@ -24,6 +24,25 @@ use Illuminate\Support\Facades\Redirect;
 class SubscribersConfigured
 {
     /**
+     * The config repository instance.
+     *
+     * @var \Illuminate\Contracts\Config\Repository
+     */
+    protected $config;
+
+    /**
+     * Creates a subscribers configured middleware instance.
+     *
+     * @param \Illuminate\Contracts\Config\Repository $config
+     *
+     * @return void
+     */
+    public function __construct(Repository $config)
+    {
+        $this->config = $config;
+    }
+
+    /**
      * Handle an incoming request.
      *
      * @param \Illuminate\Http\Request $request
@@ -33,8 +52,8 @@ class SubscribersConfigured
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!subscribers_enabled()) {
-            return Redirect::route('status-page');
+        if (!$this->config->get('setting.enable_subscribers')) {
+            return cachet_redirect('status-page');
         }
 
         return $next($request);

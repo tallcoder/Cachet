@@ -2,9 +2,7 @@
 
 @section('content')
 <div class="content-panel">
-    @if(isset($sub_menu))
-    @include('dashboard.partials.sub-sidebar')
-    @endif
+    @includeWhen(isset($sub_menu), 'dashboard.partials.sub-sidebar')
     <div class="content-wrapper">
         <div class="header sub-header" id="application-setup">
             <span class="uppercase">
@@ -13,7 +11,7 @@
         </div>
         <div class="row">
             <div class="col-sm-12">
-                <form id="settings-form" name="SettingsForm" class="form-vertical" role="form" action="/dashboard/settings" method="POST">
+                <form id="settings-form" name="SettingsForm" class="form-vertical" role="form" action="{{ cachet_route('dashboard.settings', [], 'post') }}" method="POST">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     @include('dashboard.partials.errors')
                     <fieldset>
@@ -48,6 +46,14 @@
                                 <div class="form-group">
                                     <label>{{ trans('forms.settings.app-setup.days-of-incidents') }}</label>
                                     <input type="number" max="100" name="app_incident_days" class="form-control" value="{{ Config::get('setting.app_incident_days', 7) }}" placeholder="{{ trans('forms.settings.app-setup.days-of-incidents') }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <label>{{ trans('forms.settings.app-setup.time_before_refresh') }}</label>
+                                    <input type="number" name="app_refresh_rate" class="form-control" value="{{ Config::get('setting.app_refresh_rate', 0) }}" placeholder="{{ trans('forms.settings.app-setup.time_before_refresh') }}">
                                 </div>
                             </div>
                         </div>

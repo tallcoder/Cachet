@@ -11,10 +11,9 @@
 
 namespace CachetHQ\Cachet\Http\Middleware;
 
+use CachetHQ\Cachet\Settings\Repository;
 use Closure;
-use Illuminate\Contracts\Config\Repository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
 
 /**
  * This is the setup already completed middelware class.
@@ -26,22 +25,22 @@ use Illuminate\Support\Facades\Redirect;
 class SetupAlreadyCompleted
 {
     /**
-     * The config repository instance.
+     * The settings repository instance.
      *
-     * @var \Illuminate\Contracts\Config\Repository
+     * @var \CachetHQ\Cachet\Settings\Repository
      */
-    protected $config;
+    protected $settings;
 
     /**
      * Creates a new setup already completed middleware instance.
      *
-     * @param \Illuminate\Contracts\Config\Repository $config
+     * @param \CachetHQ\Cachet\Settings\Repository $settings
      *
      * @return void
      */
-    public function __construct(Repository $config)
+    public function __construct(Repository $settings)
     {
-        $this->config = $config;
+        $this->settings = $settings;
     }
 
     /**
@@ -54,8 +53,8 @@ class SetupAlreadyCompleted
      */
     public function handle(Request $request, Closure $next)
     {
-        if ($this->config->get('setting.app_name')) {
-            return Redirect::route('dashboard.index');
+        if ($this->settings->get('app_name')) {
+            return cachet_redirect('dashboard');
         }
 
         return $next($request);

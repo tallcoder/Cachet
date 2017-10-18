@@ -11,15 +11,13 @@
 
 namespace CachetHQ\Cachet\Http\Controllers;
 
+use CachetHQ\Cachet\Bus\Commands\System\Config\UpdateConfigCommand;
 use CachetHQ\Cachet\Models\User;
 use CachetHQ\Cachet\Settings\Repository;
-use Dotenv\Dotenv;
-use Dotenv\Exception\InvalidPathException;
 use GrahamCampbell\Binput\Facades\Binput;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
@@ -54,12 +52,12 @@ class SetupController extends Controller
      * @var string[]
      */
     protected $mailDrivers = [
-        'smtp'     => 'SMTP',
-        'mail'     => 'Mail',
-        'sendmail' => 'Sendmail',
-        'mailgun'  => 'Mailgun',
-        'mandrill' => 'Mandrill',
-        // 'ses'       => 'Amazon SES', this will be available only if aws/aws-sdk-php is installed
+        'smtp'      => 'SMTP',
+        'mail'      => 'Mail',
+        'sendmail'  => 'Sendmail',
+        'mailgun'   => 'Mailgun',
+        'mandrill'  => 'Mandrill',
+        'ses'       => 'Amazon SES',
         'sparkpost' => 'SparkPost',
         'log'       => 'Log (Testing)',
     ];
@@ -260,49 +258,19 @@ class SetupController extends Controller
             $envData = array_pull($postData, 'env');
 
             // Write the env to the .env file.
-            foreach ($envData as $envKey => $envValue) {
-                $this->writeEnv($envKey, $envValue);
-            }
+            dispatch(new UpdateConfigCommand($envData));
 
             if (Request::ajax()) {
                 return Response::json(['status' => 1]);
             }
 
-            return Redirect::to('dashboard');
+            return cachet_redirect('dashboard');
         }
 
         if (Request::ajax()) {
             return Response::json(['errors' => $v->getMessageBag()], 400);
         }
 
-        return Redirect::route('setup.index')->withInput()->withErrors($v->getMessageBag());
-    }
-
-    /**
-     * Writes to the .env file with given parameters.
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return void
-     */
-    protected function writeEnv($key, $value)
-    {
-        $dir = app()->environmentPath();
-        $file = app()->environmentFile();
-        $path = "{$dir}/{$file}";
-
-        try {
-            (new Dotenv($dir, $file))->load();
-
-            $envKey = strtoupper($key);
-            $envValue = env($envKey) ?: 'null';
-
-            file_put_contents($path, str_replace(
-                $envKey.'='.$envValue, $envKey.'='.$value, file_get_contents($path)
-            ));
-        } catch (InvalidPathException $e) {
-            //
-        }
+        return cachet_redirect('setup')->withInput()->withErrors($v->getMessageBag());
     }
 }

@@ -57,7 +57,11 @@
                     </div>
                     <div class="form-group">
                         <label for="metric-places">{{ trans('forms.metrics.threshold') }}</label>
-                        <input type="number" min="0" max="100" class="form-control" name="threshold" id="metric-threshold" required value="{{ $metric->threshold }}" placeholder="{{ trans('forms.metrics.threshold') }}">
+                        <select name="threshold" class="form-control" required>
+                            @foreach ($acceptable_thresholds as $threshold)
+                            <option {{ (int) Binput::old('metric.threshold') === $threshold || $metric->threshold === $threshold ? 'selected' : null }}>{{ $threshold }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="checkbox">
                         <label>
@@ -66,6 +70,14 @@
                             {{ trans('forms.metrics.display-chart') }}
                         </label>
                     </div>
+                    <div class="form-group">
+                        <label>{{ trans('forms.metrics.visibility') }}</label>
+                        <select name="visible" class="form-control" required>
+                            <option value="0" {{ $metric->visible === 0 ? 'selected' : null }}>{{ trans('forms.metrics.visibility_authenticated') }}</option>
+                            <option value="1" {{ $metric->visible === 1 ? 'selected' : null }}>{{ trans('forms.metrics.visibility_public') }}</option>
+                            <option value="2" {{ $metric->visible === 2 ? 'selected' : null }}>{{ trans('forms.metrics.visibility_hidden') }}</option>
+                        </select>
+                    </div>
                 </fieldset>
 
                 <input type="hidden" name="id" value={{$metric->id}}>
@@ -73,7 +85,7 @@
                 <div class="form-group">
                     <div class="btn-group">
                         <button type="submit" class="btn btn-success">{{ trans('forms.update') }}</button>
-                        <a class="btn btn-default" href="{{ route('dashboard.metrics.index') }}">{{ trans('forms.cancel') }}</a>
+                        <a class="btn btn-default" href="{{ cachet_route('dashboard.metrics') }}">{{ trans('forms.cancel') }}</a>
                     </div>
                 </div>
             </form>
